@@ -9,7 +9,7 @@ load_dotenv()
 JSON_API = "https://www.reddit.com/r/{}/hot/.json?limit=" + str(MAX_POSTS_PER_QUERY)
 
 # Cache folder
-CACHE_PATH = "../cache"
+CACHE_PATH = "./cache"
 
 # Telegram API URL
 if 'BOT_KEY' in environ:

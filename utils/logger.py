@@ -2,10 +2,9 @@
 Configuration of the logging.
 """
 import logging
-from pathlib import Path
 
 # Root path for logging
-log_path: str = f'{Path(__file__).parent.resolve()}/my_debug.log'
+log_path: str = './debug.log'
 
 # Level config
 levels = {
@@ -31,7 +30,7 @@ fileHandler = logging.FileHandler(log_path)
 fileHandler.setFormatter(logFormatter)
 log.addHandler(fileHandler)
 
-# # Create console handler and add it to the logger
-# consoleHandler = logging.StreamHandler()
-# consoleHandler.setFormatter(logFormatter)
-# log.addHandler(consoleHandler)
+# Create console handler and add it to the logger
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+log.addHandler(consoleHandler)
