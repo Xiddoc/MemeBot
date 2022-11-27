@@ -3,7 +3,15 @@ Configuration of the bot.
 """
 
 # Which subs to scrape
-SUBS = ['shitposting', 'discordVideos', 'okbuddyretard', 'gayspiderbrothel', 'greentext', 'dankvideos']
+SUBS = [
+    'shitposting',
+    '196',
+    'discordVideos',
+    'okbuddyretard',
+    'gayspiderbrothel',
+    'greentext',
+    'dankvideos'
+]
 
 # How many posts to download at a time (max 100)
 MAX_POSTS_PER_QUERY = 100

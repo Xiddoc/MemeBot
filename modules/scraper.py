@@ -93,32 +93,3 @@ class Scraper:
         # Dump to file
         with open(f"{CACHE_PATH}/read_ids.json", "w") as f:
             f.write(dumps(self.read_ids))
-
-# headers = {
-#     'authority': 'gateway.reddit.com',
-#     'accept': '*/*',
-#     'accept-language': 'en-US,en;q=0.9,en-CA;q=0.8,he;q=0.7,ru;q=0.6,de;q=0.5',
-#     'cache-control': 'no-cache',
-#     'content-type': 'application/x-www-form-urlencoded',
-#     'origin': 'https://www.reddit.com',
-#     'pragma': 'no-cache',
-#     'referer': 'https://www.reddit.com/',
-#     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99' \
-#                   '.106.0.0 Safari/537.36',
-# }
-
-# params = {
-#     'rtj': 'only',
-#     'redditWebClient': 'web2x',
-#     'app': 'web2x-client-production',
-#     'allow_over18': '1',
-#     'include': 'prefsSubreddit',
-#     'after': 't3_yggjx6',
-#     'dist': '26',
-#     'forceGeopopular': 'false',
-#     'layout': 'card',
-#     'sort': 'hot',
-# }
-
-# print(requests.get('https://gateway.reddit.com/desktopapi/v1/subreddits/shitposting',
-#                    params=params, headers=headers).json())
