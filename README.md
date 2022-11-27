@@ -5,13 +5,9 @@ Reddit subs and send them over to you on Telegram.
 
 ## Installation & Setup
 
-More info will be added later. For now, the bot does not use
-any extra dependencies other than the `requests` library, which might 
-not come pre-packaged in your version of Python.
-
-If that's the case, you can install it like this:
+To install the packages necessary, run:
 ```cmd
-pip install requests
+pip install -r requirements.txt
 ```
 
 Now you need to get an API key for your bot. You can do this by 
