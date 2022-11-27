@@ -1,0 +1,124 @@
+from utils.logger import log
+from utils.constants import *
+from ffmpeg import input as ffmpeg_input
+from requests import Session
+from os.path import exists
+from os import mkdir, remove
+from json import loads, dumps
+from hashlib import sha1
+from config import *
+
+
+class Scraper:
+
+    def __init__(self):
+        # Create new session
+        self.s = Session()
+        self.s.headers.update({
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                          "Chrome/99.106.0.0 Safari/537.36 "
+        })
+
+        # Get IDs
+        self.read_ids = []
+        self.load_ids()
+
+    def download_posts(self, subreddit: str, img_cb=None, vid_cb=None) -> None:
+        # Download the JSON data
+        resp = self.s.get(JSON_API.format(subreddit))
+
+        # For each post, download the media
+        new_count = 0
+        for post in resp.json()['data']['children']:
+            # Check if processed already
+            if not post['data']['name'] in self.read_ids:
+                # Add to the list
+                self.read_ids.append(post['data']['name'])
+                new_count += 1
+
+                # Save IDs again in case of quit
+                self.save_ids()
+
+                # Check NSFW status
+                if 'thumbnail' in post['data'] \
+                        and post['data']['thumbnail'] == 'nsfw' \
+                        and not ENABLE_NSFW:
+                    # Ignore this post
+                    # If this post is NSFW and NSFW isn't on
+                    continue
+
+                # Check media type
+                if 'post_hint' in post['data']:
+
+                    # If/else per type
+                    if post['data']['post_hint'] == 'hosted:video' and img_cb is not None:
+                        # Download the video,
+                        # Then run the callback with that data
+                        vid_cb(self.download_mpd(post['data']['secure_media']['reddit_video']['dash_url']))
+                    elif post['data']['post_hint'] == 'image' and img_cb is not None:
+                        # Download the image,
+                        # Then run the callback with that data
+                        img_cb(self.download_image(post['data']['url']))
+
+        # Helpful log info
+        log.info(f"Processed {new_count} new posts...")
+
+    def download_image(self, image_url: str) -> bytes:
+        return self.s.get(image_url).content
+
+    @staticmethod
+    def download_mpd(mpd_url: str) -> bytes:
+        # Create filename
+        file_path = f"{CACHE_PATH}/{sha1(mpd_url.encode()).hexdigest()}.mp4"
+        # Download and write to stream
+        ffmpeg_input(mpd_url).output(file_path).run(quiet=True)
+        # Read the data back from the file
+        with open(file_path, 'rb') as f:
+            buf = f.read()
+        # Delete the file after finished
+        remove(file_path)
+        # Return the buffer
+        return buf
+
+    def load_ids(self):
+        # Get cached IDs
+        if not exists(CACHE_PATH):
+            mkdir(CACHE_PATH)
+        # Create default dict, then read for cached dict
+        if exists(f"{CACHE_PATH}/read_ids.json"):
+            with open(f"{CACHE_PATH}/read_ids.json") as f:
+                self.read_ids = loads(f.read())
+
+    def save_ids(self):
+        # Dump to file
+        with open(f"{CACHE_PATH}/read_ids.json", "w") as f:
+            f.write(dumps(self.read_ids))
+
+# headers = {
+#     'authority': 'gateway.reddit.com',
+#     'accept': '*/*',
+#     'accept-language': 'en-US,en;q=0.9,en-CA;q=0.8,he;q=0.7,ru;q=0.6,de;q=0.5',
+#     'cache-control': 'no-cache',
+#     'content-type': 'application/x-www-form-urlencoded',
+#     'origin': 'https://www.reddit.com',
+#     'pragma': 'no-cache',
+#     'referer': 'https://www.reddit.com/',
+#     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99' \
+#                   '.106.0.0 Safari/537.36',
+# }
+
+# params = {
+#     'rtj': 'only',
+#     'redditWebClient': 'web2x',
+#     'app': 'web2x-client-production',
+#     'allow_over18': '1',
+#     'include': 'prefsSubreddit',
+#     'after': 't3_yggjx6',
+#     'dist': '26',
+#     'forceGeopopular': 'false',
+#     'layout': 'card',
+#     'sort': 'hot',
+# }
+
+# print(requests.get('https://gateway.reddit.com/desktopapi/v1/subreddits/shitposting',
+#                    params=params, headers=headers).json())
