@@ -80,13 +80,13 @@ class Scraper:
         # Download and write to stream
         ffmpeg_input(mpd_url).output(file_path).run(quiet=True)
         # Compress the video
-        run(["ffmpeg", "-i", file_path, "-vcodec", "libx265", "-crf", "25", f"_{file_path}"],
+        run(["ffmpeg", "-i", file_path, "-vcodec", "libx265", "-crf", "25", f"{file_path}_"],
             shell=True, stdout=PIPE, stderr=PIPE)
         # Read the data back from the file
-        with open('_' + file_path, 'rb') as f:
+        with open(file_path + '_', 'rb') as f:
             buf = f.read()
         # Delete the files after finished
-        remove('_' + file_path)
+        remove(file_path + '_')
         remove(file_path)
         # Return the buffer
         return buf
