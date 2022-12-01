@@ -1,3 +1,5 @@
+from subprocess import PIPE, run
+
 from utils.logger import log
 from utils.constants import *
 # noinspection PyPackageRequirements
@@ -57,9 +59,13 @@ class Scraper:
                         # Then run the callback with that data
                         vid_cb(self.download_mpd(post['data']['secure_media']['reddit_video']['dash_url']))
                     elif post['data']['post_hint'] == 'image' and img_cb is not None:
-                        # Download the image,
-                        # Then run the callback with that data
-                        img_cb(self.download_image(post['data']['url']))
+                        # Download the image data for now
+                        img_data = self.download_image(post['data']['url'])
+                        # There is still a chance that this is a GIF and not a 'normal picture'
+                        if img_data[:3] == b"GIF":
+                            vid_cb(img_data)
+                        else:
+                            img_cb(img_data)
 
         # Helpful log info
         log.info(f"Processed {new_count} new posts...")
@@ -73,10 +79,14 @@ class Scraper:
         file_path = f"{CACHE_PATH}/{sha1(mpd_url.encode()).hexdigest()}.mp4"
         # Download and write to stream
         ffmpeg_input(mpd_url).output(file_path).run(quiet=True)
+        # Compress the video
+        run(["ffmpeg", "-i", file_path, "-vcodec", "libx265", "-crf", "25", f"_{file_path}"],
+            shell=True, stdout=PIPE, stderr=PIPE)
         # Read the data back from the file
-        with open(file_path, 'rb') as f:
+        with open('_' + file_path, 'rb') as f:
             buf = f.read()
-        # Delete the file after finished
+        # Delete the files after finished
+        remove('_' + file_path)
         remove(file_path)
         # Return the buffer
         return buf
