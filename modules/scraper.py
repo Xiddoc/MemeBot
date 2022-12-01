@@ -77,16 +77,17 @@ class Scraper:
     def download_mpd(mpd_url: str) -> bytes:
         # Create filename
         file_path = f"{CACHE_PATH}/{sha1(mpd_url.encode()).hexdigest()}.mp4"
+        out_path = file_path + '_.mp4'
         # Download and write to stream
         ffmpeg_input(mpd_url).output(file_path).run(quiet=True)
         # Compress the video
-        run(["ffmpeg", "-i", file_path, "-vcodec", "libx265", "-crf", "25", f"{file_path}_"],
+        run(f'ffmpeg -i "{file_path}" -vcodec libx265 -crf 25 "{out_path}"',
             shell=True, stdout=PIPE, stderr=PIPE)
         # Read the data back from the file
-        with open(file_path + '_', 'rb') as f:
+        with open(out_path, 'rb') as f:
             buf = f.read()
         # Delete the files after finished
-        remove(file_path + '_')
+        remove(out_path)
         remove(file_path)
         # Return the buffer
         return buf
