@@ -1,10 +1,10 @@
 from os import listdir, remove
 from time import sleep
 
-from utils.constants import *
-from utils.logger import log
 from modules.scraper import Scraper
 from modules.telebot import TeleBot
+from utils.constants import *
+from utils.logger import log
 
 # Spawn fake session
 log.info("Loading...")

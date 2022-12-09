@@ -104,5 +104,5 @@ class TeleBot:
         if resp.status_code == 200:
             return resp.json()['result']
         else:
-            # Log HTTP errors
-            log.error(f"HTTP Error at Path={method}: {resp.text}")
+            # Log HTTP fails
+            log.error(f"HTTP {resp.status_code}: {method} {resp.text}")

@@ -1,15 +1,16 @@
-from subprocess import PIPE, run
-
-from utils.logger import log
-from utils.constants import *
-# noinspection PyPackageRequirements
-from ffmpeg import input as ffmpeg_input
-from requests import Session
-from os.path import exists
-from os import mkdir, remove
-from json import loads, dumps
 from hashlib import sha1
-from config import *
+from json import loads, dumps
+from os import mkdir, remove
+from os.path import exists
+from subprocess import PIPE, run
+from time import sleep
+
+# noinspection PyPackageRequirements
+from ffmpeg import input as ffmpeg_input, Error
+from requests import Session, RequestException
+
+from utils.constants import *
+from utils.logger import log
 
 
 class Scraper:
@@ -50,22 +51,29 @@ class Scraper:
                     # If this post is NSFW and NSFW isn't on
                     continue
 
-                # Check media type
-                if 'post_hint' in post['data']:
+                try:
+                    # Check media type
+                    if 'post_hint' in post['data']:
+                        # If video
+                        if post['data']['post_hint'] == 'hosted:video' and img_cb is not None:
+                            # Download the video,
+                            # Then run the callback with that data
+                            vid_cb(self.download_mpd(post['data']['secure_media']['reddit_video']['dash_url']))
 
-                    # If/else per type
-                    if post['data']['post_hint'] == 'hosted:video' and img_cb is not None:
-                        # Download the video,
-                        # Then run the callback with that data
-                        vid_cb(self.download_mpd(post['data']['secure_media']['reddit_video']['dash_url']))
-                    elif post['data']['post_hint'] == 'image' and img_cb is not None:
-                        # Download the image data for now
-                        img_data = self.download_image(post['data']['url'])
-                        # There is still a chance that this is a GIF and not a 'normal picture'
-                        if img_data[:3] == b"GIF":
-                            vid_cb(img_data)
-                        else:
-                            img_cb(img_data)
+                        # If image
+                        elif post['data']['post_hint'] == 'image' and img_cb is not None:
+                            # Download the image data for now
+                            img_data = self.download_image(post['data']['url'])
+                            # There is still a chance that this is a GIF and not a 'normal picture'
+                            if img_data[:3] == b"GIF":
+                                vid_cb(img_data)
+                            else:
+                                img_cb(img_data)
+                except RequestException:
+                    log.error("HTTP request exception...")
+                    sleep(15)
+                except Error:
+                    log.error("FFMPEG error...")
 
         # Helpful log info
         log.info(f"Processed {new_count} new posts...")
