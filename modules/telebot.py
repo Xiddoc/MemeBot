@@ -63,21 +63,24 @@ class TeleBot:
                 # Figure out if the user unblocked us ...
                 if msg['my_chat_member']['new_chat_member']['status'] == 'member':
                     # Add the user ID to the set
-                    log.info(f"Re-added user #{msg['new_chat_member']['from']['id']}...")
-                    self.users.add(str(msg['my_chat_member']['new_chat_member']['from']['id']))
+                    new_user = str(msg['my_chat_member']['new_chat_member']['from']['id'])
+                    log.info(f"Re-added user #{new_user}...")
+                    self.users.add(new_user)
 
                 # ... or blocked us
                 elif msg['my_chat_member']['new_chat_member']['status'] == 'kicked':
                     # The user blocked us, and we have them registered, then remove them
                     try:
-                        log.info(f"Removed user #{msg['my_chat_member']['from']['id']}...")
-                        self.users.remove(msg['my_chat_member']['chat']['id'])
+                        old_user = str(msg['my_chat_member']['from']['id'])
+                        log.info(f"Removed user #{old_user}...")
+                        self.users.remove(old_user)
                     except KeyError:
                         pass
             else:
                 # Add the user ID to the set
-                log.info(f"Added new user #{msg['message']['from']['id']}...")
-                self.users.add(str(msg['message']['from']['id']))
+                new_user = str(msg['message']['from']['id'])
+                log.info(f"Added new user #{new_user}...")
+                self.users.add(new_user)
 
             # Update the last update
             self.offset = msg['update_id'] + 1
