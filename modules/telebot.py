@@ -64,7 +64,7 @@ class TeleBot:
                 if msg['my_chat_member']['new_chat_member']['status'] == 'member':
                     # Add the user ID to the set
                     log.info(f"Re-added user #{msg['new_chat_member']['from']['id']}...")
-                    self.users.add(str(msg['new_chat_member']['from']['id']))
+                    self.users.add(str(msg['my_chat_member']['new_chat_member']['from']['id']))
 
                 # ... or blocked us
                 elif msg['my_chat_member']['new_chat_member']['status'] == 'kicked':
