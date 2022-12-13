@@ -24,14 +24,19 @@ log.info(f"Removed {len(remove_files)} cached files...")
 
 log.info("Starting bot...")
 while True:
-    # Download the new posts from each sub
-    for sub in SUBS:
-        # Callback to the send function of the bot
-        scr.download_posts(
-            subreddit=sub,
-            img_cb=bot.send_photo,
-            vid_cb=bot.send_video,
-        )
+    # Refresh IDs of people who want memes
+    bot.update_users()
+
+    # No need to spend processing power if no one wants our memes :(
+    if bot.users:
+        # Download the new posts from each sub
+        for sub in SUBS:
+            # Callback to the send function of the bot
+            scr.download_posts(
+                subreddit=sub,
+                img_cb=bot.send_photo,
+                vid_cb=bot.send_video,
+            )
 
     # Wait till next iteration
     sleep(QUERY_DELAY)
