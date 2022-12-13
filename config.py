@@ -21,3 +21,6 @@ QUERY_DELAY = 3600
 
 # NSFW Posts
 ENABLE_NSFW = False
+
+# Log to console as well as to a debug file
+LOG_TO_CONSOLE = False
