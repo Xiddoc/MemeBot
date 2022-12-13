@@ -1,7 +1,7 @@
 from json import loads, dumps
 from os.path import exists
 from time import sleep
-from typing import Dict
+from typing import Dict, Set
 
 from requests import Session
 
@@ -16,7 +16,7 @@ class TeleBot:
         self.s = Session()
         self.post_queue = {}
         self.offset = 0
-        self.users = set()
+        self.users: Set[str] = set()
 
         # Login to the bot
         bot_data = self.__api("getMe")
