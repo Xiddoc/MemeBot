@@ -63,7 +63,7 @@ class TeleBot:
                 # Figure out if the user unblocked us ...
                 if msg['my_chat_member']['new_chat_member']['status'] == 'member':
                     # Add the user ID to the set
-                    new_user = str(msg['my_chat_member']['new_chat_member']['from']['id'])
+                    new_user = str(msg['my_chat_member']['from']['id'])
                     log.info(f"Re-added user #{new_user}...")
                     self.users.add(new_user)
 
