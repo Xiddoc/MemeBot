@@ -26,9 +26,6 @@ class TeleBot:
         self.load_users()
         log.info(f"Loaded {len(self.users)} users...")
 
-        # Get IDs of people who want memes
-        self.update_users()
-
     def send_photo(self, photo: bytes) -> None:
         # Send to all users
         for user in self.users:
@@ -59,8 +56,29 @@ class TeleBot:
         # Get count for logging
         start_count = len(self.users)
         for msg in updates:
-            # Add the user ID to the set
-            self.users.add(str(msg['message']['from']['id']))
+            # First check if we got blocked
+            # https://core.telegram.org/bots/api#update
+            # > For private chats, this update is received only when the bot is blocked or unblocked by the user.
+            if 'my_chat_member' in msg and msg['my_chat_member']['chat']['type'] == 'private':
+                # Figure out if the user unblocked us ...
+                if msg['my_chat_member']['new_chat_member']['status'] == 'member':
+                    # Add the user ID to the set
+                    log.info(f"Re-added user #{msg['new_chat_member']['from']['id']}...")
+                    self.users.add(str(msg['new_chat_member']['from']['id']))
+
+                # ... or blocked us
+                elif msg['my_chat_member']['new_chat_member']['status'] == 'kicked':
+                    # The user blocked us, and we have them registered, then remove them
+                    try:
+                        log.info(f"Removed user #{msg['my_chat_member']['from']['id']}...")
+                        self.users.remove(msg['my_chat_member']['chat']['id'])
+                    except KeyError:
+                        pass
+            else:
+                # Add the user ID to the set
+                log.info(f"Added new user #{msg['message']['from']['id']}...")
+                self.users.add(str(msg['message']['from']['id']))
+
             # Update the last update
             self.offset = msg['update_id'] + 1
 
