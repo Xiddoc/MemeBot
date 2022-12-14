@@ -1,6 +1,8 @@
 from os import listdir, remove
 from time import sleep
 
+from requests import RequestException
+
 from modules.scraper import Scraper
 from modules.telebot import TeleBot
 from utils.constants import *
@@ -25,7 +27,12 @@ log.info(f"Removed {len(remove_files)} cached files...")
 log.info("Starting bot...")
 while True:
     # Refresh IDs of people who want memes
-    bot.update_users()
+    try:
+        bot.update_users()
+    except RequestException:
+        log.error("HTTP request exception while updating users...")
+        sleep(15)
+        continue
 
     # No need to spend processing power if no one wants our memes :(
     if bot.users:

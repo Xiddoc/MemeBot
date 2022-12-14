@@ -70,7 +70,7 @@ class Scraper:
                             else:
                                 img_cb(img_data)
                 except RequestException:
-                    log.error("HTTP request exception...")
+                    log.error("HTTP request exception while scraping...")
                     sleep(15)
                 except Error:
                     log.error("FFMPEG error...")
