@@ -4,7 +4,7 @@ from os import mkdir, remove
 from os.path import exists
 from subprocess import PIPE, run
 from time import sleep
-
+from typing import Dict
 # noinspection PyPackageRequirements
 from ffmpeg import input as ffmpeg_input, Error
 from requests import Session, RequestException
@@ -29,11 +29,16 @@ class Scraper:
 
     def download_posts(self, subreddit: str, img_cb=None, vid_cb=None) -> None:
         # Download the JSON data
-        resp = self.s.get(JSON_API.format(subreddit))
+        resp: Dict = self.s.get(JSON_API.format(subreddit)).json()
+
+        new_count = 0
+        # Sanity check that the API returned the data
+        if not ('data' in resp and 'children' in resp['data']):
+            log.warn(f"API did not return posts: {resp}")
+            return
 
         # For each post, download the media
-        new_count = 0
-        for post in resp.json()['data']['children']:
+        for post in resp['data']['children']:
             # Check if processed already
             if not post['data']['name'] in self.read_ids:
                 # Add to the list
