@@ -29,7 +29,11 @@ class Scraper:
 
     def download_posts(self, subreddit: str, img_cb=None, vid_cb=None) -> None:
         # Download the JSON data
-        resp: Dict = self.s.get(JSON_API.format(subreddit)).json()
+        try:
+            resp: Dict = self.s.get(JSON_API.format(subreddit)).json()
+        except RequestException:
+            # If we fail while trying to download posts, maybe Reddit is down
+            return
 
         new_count = 0
         # Sanity check that the API returned the data
