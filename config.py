@@ -6,6 +6,7 @@ Configuration of the bot.
 SUBS = [
     'shitposting',
     '196',
+    '197',
     'discordVideos',
     'okbuddyretard',
     'gayspiderbrothel',
